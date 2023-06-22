@@ -133,7 +133,7 @@
         </div>
     </div>
     <div class="card col-6 d-flex flex-column p-3 h-100 m-2">
-        <p id="result" class="flex-grow-1 m-0 p-0 overflow-auto" x-text="JSON.stringify(payload)"></p>
+        <p id="result" class="flex-grow-1 m-0 p-0 overflow-auto" x-text="payload"></p>
         <template x-if="payload!=''">
             <button id="copy_json" class="btn btn-success" @click="copyPayload">
                 Copiar JSON
@@ -231,6 +231,15 @@
                             <input type="text" class="form-control" id="enpoint_control"
                                 placeholder="Ej: /mag_tramites/paises_coleccion"
                                 x-model="control_options.enpoint_control">
+                        </div>
+                    </template>
+                    <template
+                        x-if="(control_options.type_control!='input' && control_options.type_control!='textarea') && control_options.is_colection">
+                        <div class="mb-3">
+                            <label for="name_object_control" class="form-label">Name object, clave con que se recuperan los nombres del endpoint</label>
+                            <input type="text" class="form-control" id="name_object_control"
+                                placeholder="Ej: nombre_pais"
+                                x-model="control_options.name_object">
                         </div>
                     </template>
                     <template

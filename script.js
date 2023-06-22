@@ -3,6 +3,7 @@ function data() {
     payload: '',
     elementOption: '',
     selectedGroup: '',
+    defaultExist: false,
     control_options: {
       type_control: 'input',
       label_control: '',
@@ -11,6 +12,7 @@ function data() {
       header_control: '',
       is_colection: true,
       enpoint_control: '',
+      name_object: '',
       options: [],
       is_required: true,
       data_type_control: 'string'
@@ -27,7 +29,7 @@ function data() {
       file_removed: 'File eliminado'
     },
     errors: {
-      complete: 'Llena todos los campos'
+      complete: 'Llena los campos correctamente'
     },
     swal_error: Swal.mixin({
       icon: 'error',
@@ -53,12 +55,27 @@ function data() {
       timer: 2000,
       timerProgressBar: false
     }),
+    swal_info: Swal.mixin({
+      icon: 'info',
+      toast: true,
+      position: 'bottom-right',
+      iconColor: 'white',
+      customClass: {
+        popup: 'colored-toast'
+      },
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: false
+    }),
     addControlGroup: function () {
       let key = document.getElementById('key_grupo')
       let label = document.getElementById('label_grupo')
-      if (key && label) {
+      if (key.value && !(key.value == 'default' && this.defaultExist)) {
         let control_group = {}
         control_group['key'] = key.value
+        if (key.value == 'default') {
+          this.defaultExist = true
+        }
         control_group['label'] = label.value
         control_group['controls'] = []
         document.getElementById('close_modal').click()
@@ -70,10 +87,10 @@ function data() {
         key.value = ''
         label.value = ''
         this.swal_success.fire({ title: this.success.add_element })
+        this.newPayload()
       } else {
         this.swal_error.fire({ title: this.errors.complete })
       }
-      this.newPayload()
     },
     removeControlGroup: function (groupKey, elOption) {
       this.elementOption = elOption
@@ -82,7 +99,10 @@ function data() {
       } else {
         this.control_groups = this.control_groups.filter(control => control.key != groupKey)
       }
-      this.swal_success.fire({ title: this.success.element_removed })
+      if (groupKey == 'default') {
+        this.defaultExist = false
+      }
+      this.swal_info.fire({ title: this.success.element_removed })
       this.newPayload()
     },
     addControl: function (groupKey, elOption) {
@@ -109,6 +129,7 @@ function data() {
           }
           if (this.control_options.is_colection) {
             valid = this.control_options.enpoint_control ? true : false
+            valid = this.control_options.name_object ? true : false
           }
           else {
             valid = this.control_options.options.length > 0 ? true : false
@@ -141,6 +162,7 @@ function data() {
           this.control_options.header_control = ''
           this.control_options.is_colection = true
           this.control_options.enpoint_control = ''
+          this.control_options.name_object = ''
           this.control_options.options = []
           this.control_options.is_required = true
           this.control_options.data_type_control = 'string'
@@ -168,6 +190,7 @@ function data() {
           }
         })
       }
+      this.swal_info.fire({ title: this.success.element_removed })
       this.newPayload()
     },
     addOption: function () {
@@ -181,7 +204,7 @@ function data() {
       let key = document.getElementById('key_file')
       let label = document.getElementById('label_file')
       let required = document.getElementById('required_file')
-      if (key && label) {
+      if (key.value && label.value) {
         let file = {}
         file['key'] = key.value
         file['label'] = label.value
@@ -199,18 +222,23 @@ function data() {
     },
     removeFile: function (fileKey) {
       this.files = this.files.filter(file => file.key != fileKey)
+      this.swal_info.fire({ title: this.success.element_removed })
       this.newPayload()
     },
     newPayload: function () {
-      let objeto = {
-        control_groups: {},
-        tables: {},
-        files: {},
-        submit: {
-          method: 'POST',
-          endpoint: document.getElementById('label_endpoint').value
+      let objeto = ''
+      if (this.control_groups.length > 0 || this.tables.length > 0 || this.files.length > 0) {
+        objeto = {
+          control_groups: {},
+          tables: {},
+          files: {},
+          submit: {
+            method: 'POST',
+            endpoint: document.getElementById('label_endpoint').value
+          }
         }
       }
+
       this.control_groups.forEach(element => {
         let controls = {}
         element.controls.forEach(el => {
@@ -227,7 +255,7 @@ function data() {
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
-              name_object: ''
+              name_object: el.name_object
             },
             placeholder: el.placeholder
           }
@@ -264,7 +292,7 @@ function data() {
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
-              name_object: ''
+              name_object: el.name_object
             },
             placeholder: el.placeholder,
             position: index
@@ -280,7 +308,7 @@ function data() {
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
-              name_object: ''
+              name_object: el.name_object
             }
           }
         })
@@ -303,14 +331,12 @@ function data() {
           }
         }
       })
-      this.payload = ''
-      this.payload = JSON.parse(JSON.stringify(objeto))
-      console.log(this.payload)
+      this.payload = objeto ? JSON.stringify(objeto) : ''
     },
     copyPayload: function () {
       this.newPayload()
       if (navigator.clipboard) {
-        let mensaje = JSON.stringify(this.payload)
+        let mensaje = this.payload
 
         navigator.clipboard.writeText(mensaje)
           .then(() => {
