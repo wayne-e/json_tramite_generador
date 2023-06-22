@@ -251,7 +251,7 @@ function data() {
             },
             value: '',
             collection: {
-              id: '',
+              id: 0,
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
@@ -288,7 +288,7 @@ function data() {
             },
             value: '',
             collection: {
-              id: '',
+              id: 0,
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
@@ -304,7 +304,7 @@ function data() {
           body[el.key_control] = {
             value: '',
             collection: {
-              id: '',
+              id: 0,
               is: el.is_colection,
               options: [...el.options],
               endpoint: el.enpoint_control,
